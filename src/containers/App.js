@@ -1,41 +1,102 @@
 import React, { useState, useEffect } from 'react';
 import CardList from '../components/CardList';
 import SearchBox from '../components/SearchBox';
-import Scroll from '../components/Scroll';
+import SearchButton from '../components/SearchButton';
+import AddLineupButton from '../components/AddLineupButton';
 import ErrorBoundry from '../components/ErrorBoundry';
+import CardLineup from '../components/CardLineup';
+import CardLineupList from '../components/CardLineupList';
 import './App.css';
 
 function App () {
-    const [robots, setRobots] = useState([])
+    const [pokemons, setPokemons] = useState([])
     const [searchfield, setSearchfield] = useState('')
-    const [count, setCount] = useState(0)
+    const [mypokemons, setMypokemons] = useState([])
+    // const [count, setCount] = useState(0)
 
     useEffect(() => {
-        fetch("https://jsonplaceholder.typicode.com/users")
+        fetch("http://localhost:3000/api/v1/pokemons")
             .then(res => res.json())
-            .then(users => {setRobots(users)});
-            console.log(count)
-    },[count])
+            .then(users => {setMypokemons(users)});
+    },[mypokemons])
+
+    // async function getMyPokemons() {
+	// 	try {
+	// 		const response = await fetch('http://localhost:3000/api/v1/pokemons')
+    // 		const data = await response.json();
+    //         console.log(data)
+	// 		setMypokemons(data)
+	// 	  } catch (err) {
+	// 		console.error('err', err);
+	// 	  }
+          
+	// }
+
+    async function getPokemon(params) {
+		try {
+			const requestOptions = {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json','Accept': 'application/json' },
+				body: JSON.stringify(params)
+			};
+			// const response = await fetch("http://localhost:3000/api/v1/pokemons/", requestOptions)
+			const response = await fetch(`http://localhost:3000/api/v1/pokemons/${params}`)
+    		const data = await response.json();
+			setPokemons(data)
+		  } catch (err) {
+			console.error('err', err);
+		  }
+	}
     
     const onSearchChange = (event) => {
         setSearchfield(event.target.value);
+        // console.log(event.target.value);
+        // getPokemon(event.target.value);
     }
 
-    const filteredRobots = robots.filter(robot =>{
-        return robot.name.toLowerCase().includes(searchfield.toLowerCase());
+    const onSearchClick = (event) => {
+    //     // setSearchfield(event.target.value);
+        // console.log(searchfield);
+        getPokemon(searchfield);
+    }
+
+    const filteredPokemons = pokemons.filter(pokemon =>{
+        return pokemon.name.toLowerCase();
+    });
+    const filteredMyPokemons = mypokemons.filter(pokemon1 =>{
+        return pokemon1.name.toLowerCase();
     });
 
-    return !robots.length ?
-    <div className='tc'> <h1>Loading</h1> </div> :
-    (
+    // return !pokemons.length ?
+    return(
         <div className='tc'>
-            <h1 className='f1'>RoboFriends</h1>
-            <SearchBox searchChange={onSearchChange}/>
-            <Scroll>
-                <ErrorBoundry>
-                    <CardList robots={filteredRobots} />
-                </ErrorBoundry>
-            </Scroll>
+            <h1 className='f3 white mb4'>Welcome to Pokemon League</h1>
+                <article className="cf">
+                <div className="fl w-60 tc">
+                    <h1 className='f4 white mb2'>Pokemon Lineup</h1>
+                        <div className="pokemon-line-up ml4">
+                            <CardLineupList mypokemons={filteredMyPokemons} />
+                        </div>
+                        
+                        <div className="pokemon-data mv4 ml4">
+                            <h1 className='f4 white mb2'>Pokemon Data</h1>
+                            <div className='center ba b--black-10 shadow-5 data'>
+
+                            </div>
+                        </div>
+                </div>
+                <div className="fl w-40 tc">
+                    <h1 className='f4 white mb2'>Pokedex</h1>
+                    <div className='pa2'>
+                        <SearchBox searchChange={onSearchChange} />
+                        <SearchButton searchClick={onSearchClick} />
+                    </div>
+                    <ErrorBoundry>
+                        <CardList pokemons={filteredPokemons} />
+                    </ErrorBoundry>
+                    <AddLineupButton />
+                </div>
+                </article>
         </div>
     );           
 }
