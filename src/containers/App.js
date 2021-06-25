@@ -20,18 +20,6 @@ function App () {
             .then(users => {setMypokemons(users)});
     },[mypokemons])
 
-    // async function getMyPokemons() {
-	// 	try {
-	// 		const response = await fetch('http://localhost:3000/api/v1/pokemons')
-    // 		const data = await response.json();
-    //         console.log(data)
-	// 		setMypokemons(data)
-	// 	  } catch (err) {
-	// 		console.error('err', err);
-	// 	  }
-          
-	// }
-
     async function getPokemon(params) {
 		try {
 			const requestOptions = {
@@ -39,7 +27,6 @@ function App () {
 				headers: { 'Content-Type': 'application/json','Accept': 'application/json' },
 				body: JSON.stringify(params)
 			};
-			// const response = await fetch("http://localhost:3000/api/v1/pokemons/", requestOptions)
 			const response = await fetch(`http://localhost:3000/api/v1/pokemons/${params}`)
     		const data = await response.json();
 			setPokemons(data)

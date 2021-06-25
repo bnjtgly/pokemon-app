@@ -3,7 +3,7 @@ import React from 'react';
 const Card = ({name, abilities, id, types}) => {
     
     return (
-        <div className='center ba b--black-10 w-80 shadow-5'>
+        <div className='center ba b--black-10 grow w-80 shadow-5'>
             <img className="pokemon-img" alt='pokemons' src={`https://pokeres.bastionbot.org/images/pokemon/${id}.png`} />
             <div>
                 <p className="mid-gray pv0 mv0">#{id}</p>
