@@ -4,29 +4,61 @@ import SearchBox from '../components/SearchBox';
 import SearchButton from '../components/SearchButton';
 import AddLineupButton from '../components/AddLineupButton';
 import ErrorBoundry from '../components/ErrorBoundry';
-import CardLineup from '../components/CardLineup';
 import CardLineupList from '../components/CardLineupList';
+import Signin from '../components/Signin/Signin';
+import Register from '../components/Register/Register';
+import Navigation from '../components/Navigation/Navigation';
 import './App.css';
 
 function App () {
     const [pokemons, setPokemons] = useState([])
     const [searchfield, setSearchfield] = useState('')
     const [mypokemons, setMypokemons] = useState([])
-    // const [count, setCount] = useState(0)
+    const [route, setRoute] = useState('signin')
+    const [isSignedIn, setIsSignedIn] = useState(false)
+
 
     useEffect(() => {
-        fetch("http://localhost:3000/api/v1/pokemons")
+        let token = localStorage.getItem("token")
+        if(token !== null){
+            setRoute('home')
+            setIsSignedIn(true)
+        }
+    },[route])
+    useEffect(() => {
+        fetch("http://localhost:3000/api/v1/user_pokemons", {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: localStorage.getItem("token"),
+            },
+          })
             .then(res => res.json())
-            .then(users => {setMypokemons(users)});
-    },[mypokemons])
+            .then(user => {setMypokemons(user)});
+        // fetch("http://localhost:3000/api/v1/user_pokemons", {
+        //     headers: {
+        //         "Content-Type": "application/json",
+        //         Authorization: localStorage.getItem("token"),
+        //     },})
+        //     .then((res) => {
+        //         if (res.ok) {
+        //             const data = res.json();
+        //             setMypokemons(data)
+        //             return res.json();
+        //         } else if (res.status === "401") {
+        //             throw new Error("Unauthorized Request. Must be signed in.");
+        //         }
+        //     })
+        //     .then((json) => console.dir(json))
+        //     .catch((err) => console.error(err));
+    },[])
 
     async function getPokemon(params) {
 		try {
-			const requestOptions = {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json','Accept': 'application/json' },
-				body: JSON.stringify(params)
-			};
+			// const requestOptions = {
+			// 	method: 'POST',
+			// 	headers: { 'Content-Type': 'application/json','Accept': 'application/json' },
+			// 	body: JSON.stringify(params)
+			// };
 			const response = await fetch(`http://localhost:3000/api/v1/pokemons/${params}`)
     		const data = await response.json();
 			setPokemons(data)
@@ -42,48 +74,72 @@ function App () {
     }
 
     const onSearchClick = (event) => {
-    //     // setSearchfield(event.target.value);
-        // console.log(searchfield);
+         // setSearchfield(event.target.value);
         getPokemon(searchfield);
     }
 
     const filteredPokemons = pokemons.filter(pokemon =>{
         return pokemon.name.toLowerCase();
     });
-    const filteredMyPokemons = mypokemons.filter(pokemon1 =>{
-        return pokemon1.name.toLowerCase();
-    });
+    // const filteredMyPokemons = mypokemons.filter(pokemon1 =>{
+    //     // return pokemon1.name.toLowerCase();
+    // });
+
+    const onRouteChange = (route) => {
+        if (route === 'signout') {
+            localStorage.removeItem("token");
+            setIsSignedIn(false)
+        } else if (route === 'home') {
+          setIsSignedIn(true)
+        }
+        setRoute(route);
+    }
+
+    const onCardListClick = (event) => {
+        const pokemon_id = event.target.id.replace("my-pokemon-", ""); 
+        console.log(pokemon_id);
+    }
 
     // return !pokemons.length ?
     return(
-        <div className='tc'>
-            <h1 className='f3 white mb4'>Welcome to Pokemon League</h1>
-                <article className="cf">
-                <div className="fl w-60 tc">
-                    <h1 className='f4 white mb2'>Pokemon Lineup</h1>
-                        <div className="pokemon-line-up ml4">
-                            <CardLineupList mypokemons={filteredMyPokemons} />
-                        </div>
-                        
-                        <div className="pokemon-data mv4 ml4">
-                            <h1 className='f4 white mb2'>Pokemon Data</h1>
-                            <div className='center ba b--black-10 shadow-5 data'>
-
+        <div className="App">
+        <Navigation isSignedIn={isSignedIn} onRouteChange={onRouteChange} />
+        { route === 'home' ?
+            <div className='tc'>
+                <h1 className='f3 white mb4'>Welcome to Pokemon League</h1>
+                    <article className="cf">
+                    <div className="fl w-60 tc">
+                        <h1 className='f4 white mb2'>Pokemon Lineup</h1>
+                            <div className="pokemon-line-up ml4">
+                                <CardLineupList onCardListClick={onCardListClick} mypokemons={mypokemons} />
                             </div>
-                        </div>
-                </div>
-                <div className="fl w-40 tc">
-                    <h1 className='f4 white mb2'>Pokedex</h1>
-                    <div className='pa2'>
-                        <SearchBox searchChange={onSearchChange} />
-                        <SearchButton searchClick={onSearchClick} />
+                            
+                            <div className="pokemon-data mv4 ml4">
+                                <h1 className='f4 white mb2'>Pokemon Data</h1>
+                                <div className='center ba b--black-10 shadow-5 data'>
+
+                                </div>
+                            </div>
                     </div>
-                    <ErrorBoundry>
-                        <CardList pokemons={filteredPokemons} />
-                    </ErrorBoundry>
-                    <AddLineupButton />
-                </div>
-                </article>
+                    <div className="fl w-40 tc">
+                        <h1 className='f4 white mb2'>Pokedex</h1>
+                        <div className='pa2'>
+                            <SearchBox searchChange={onSearchChange} />
+                            <SearchButton searchClick={onSearchClick} />
+                        </div>
+                        <ErrorBoundry>
+                            <CardList pokemons={filteredPokemons} />
+                        </ErrorBoundry>
+                        <AddLineupButton />
+                    </div>
+                    </article>
+            </div>
+            : (
+                route === 'signin'
+                ? <Signin onRouteChange={onRouteChange}/>
+                : <Register onRouteChange={onRouteChange}/>
+               )
+           }
         </div>
     );           
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import CardLineup from './CardLineup';
 
-const CardLineupList = ({ mypokemons }) => {
+const CardLineupList = ({ mypokemons, onCardListClick }) => {
     return(
         <div className="flex flex-wrap justify-between">
             {
@@ -9,8 +9,10 @@ const CardLineupList = ({ mypokemons }) => {
                     return (
                         <CardLineup
                             key={i}
+                            id={mypokemons[i].id}
                             pokedex_id={mypokemons[i].info[0].pokedex_id}
                             name={mypokemons[i].name}
+                            onCardListClick={onCardListClick}
                         />
                     );
                 })
