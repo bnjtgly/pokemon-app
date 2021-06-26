@@ -27,6 +27,7 @@ function App () {
                 console.log("EXPIRED");
                 setRoute('signin')
                 setIsSignedIn(false)
+                
             }else{
                 setRoute('home')
                 setIsSignedIn(true)
@@ -82,6 +83,7 @@ function App () {
             setIsSignedIn(false)
         } else if (route === 'home') {
           setIsSignedIn(true)
+          window.location.reload();
           getMyPokemon()
         }
         setRoute(route);
