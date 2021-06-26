@@ -1,8 +1,8 @@
 import React from 'react';
 
-const AddLineupButton = () => {
+const AddLineupButton = ({addPokemonClick}) => {
     return(
-            <a className="pa3 link ba dim mt2 dib white pointer" >Add to Lineup</a>
+            <a onClick={addPokemonClick} className="pa3 link ba dim mt2 dib white pointer" >Add to Lineup</a>
     );
 }
 

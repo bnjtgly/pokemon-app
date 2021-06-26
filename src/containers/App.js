@@ -8,12 +8,14 @@ import CardLineupList from '../components/CardLineupList';
 import Signin from '../components/Signin/Signin';
 import Register from '../components/Register/Register';
 import Navigation from '../components/Navigation/Navigation';
+import PokemonData from '../components/PokemonData/PokemonData';
 import './App.css';
 
 function App () {
     const [pokemons, setPokemons] = useState([])
     const [searchfield, setSearchfield] = useState('')
     const [mypokemons, setMypokemons] = useState([])
+    const [mypokemonsInfo, setMypokemonsInfo] = useState([])
     const [route, setRoute] = useState('signin')
     const [isSignedIn, setIsSignedIn] = useState(false)
 
@@ -21,52 +23,44 @@ function App () {
     useEffect(() => {
         let token = localStorage.getItem("token")
         if(token !== null){
-            setRoute('home')
-            setIsSignedIn(true)
+            if (token.exp < new Date().getTime()/1000) {
+                console.log("EXPIRED");
+                setRoute('signin')
+                setIsSignedIn(false)
+            }else{
+                setRoute('home')
+                setIsSignedIn(true)
+            }
         }
-    },[route])
-    useEffect(() => {
-        fetch("http://localhost:3000/api/v1/user_pokemons", {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: localStorage.getItem("token"),
-            },
-          })
-            .then(res => res.json())
-            .then(user => {setMypokemons(user)});
-        // fetch("http://localhost:3000/api/v1/user_pokemons", {
-        //     headers: {
-        //         "Content-Type": "application/json",
-        //         Authorization: localStorage.getItem("token"),
-        //     },})
-        //     .then((res) => {
-        //         if (res.ok) {
-        //             const data = res.json();
-        //             setMypokemons(data)
-        //             return res.json();
-        //         } else if (res.status === "401") {
-        //             throw new Error("Unauthorized Request. Must be signed in.");
-        //         }
-        //     })
-        //     .then((json) => console.dir(json))
-        //     .catch((err) => console.error(err));
-    },[])
+    },[]);
 
     async function getPokemon(params) {
 		try {
-			// const requestOptions = {
-			// 	method: 'POST',
-			// 	headers: { 'Content-Type': 'application/json','Accept': 'application/json' },
-			// 	body: JSON.stringify(params)
-			// };
 			const response = await fetch(`http://localhost:3000/api/v1/pokemons/${params}`)
     		const data = await response.json();
 			setPokemons(data)
-		  } catch (err) {
+		} catch (err) {
 			console.error('err', err);
-		  }
+		}
 	}
     
+    async function getMyPokemon() {
+		try {
+			const requestOptions = {
+				headers: { 'Content-Type': 'application/json', Authorization: localStorage.getItem("token") }
+			};
+			const response = await fetch("http://localhost:3000/api/v1/user_pokemons", requestOptions)
+    		const data = await response.json();
+			setMypokemons(data)
+		} catch (err) {
+			console.error('err', err);
+		}
+	}
+
+    useEffect(() => {
+        getMyPokemon();
+    },[mypokemons])
+
     const onSearchChange = (event) => {
         setSearchfield(event.target.value);
         // console.log(event.target.value);
@@ -74,30 +68,73 @@ function App () {
     }
 
     const onSearchClick = (event) => {
-         // setSearchfield(event.target.value);
         getPokemon(searchfield);
     }
 
-    const filteredPokemons = pokemons.filter(pokemon =>{
-        return pokemon.name.toLowerCase();
-    });
-    // const filteredMyPokemons = mypokemons.filter(pokemon1 =>{
-    //     // return pokemon1.name.toLowerCase();
+    // const filteredPokemons = pokemons.filter(pokemon =>{
+    //     return pokemon.name.toLowerCase();
     // });
 
     const onRouteChange = (route) => {
         if (route === 'signout') {
             localStorage.removeItem("token");
+            setRoute('signin')
             setIsSignedIn(false)
         } else if (route === 'home') {
           setIsSignedIn(true)
+          getMyPokemon()
         }
         setRoute(route);
     }
 
+    async function getMyPokemonInfo(params) {
+		try {
+			const requestOptions = {
+				headers: { 'Content-Type': 'application/json', Authorization: localStorage.getItem("token") }
+			};
+			const response = await fetch(`http://localhost:3000/api/v1/user_pokemons/${params}`, requestOptions)
+    		const data = await response.json();
+			setMypokemonsInfo(data)
+		} catch (err) {
+			console.error('err', err);
+		}
+	}
+
     const onCardListClick = (event) => {
         const pokemon_id = event.target.id.replace("my-pokemon-", ""); 
-        console.log(pokemon_id);
+        getMyPokemonInfo(pokemon_id);
+    }
+
+    async function addPokemon(params) {
+		try {
+			const requestOptions = {
+                method: 'post',
+				headers: { 'Content-Type': 'application/json', Authorization: localStorage.getItem("token") },
+                body: JSON.stringify(params)
+			};
+			const response = await fetch(`http://localhost:3000/api/v1/user_pokemons`, requestOptions)
+    		const data = await response.json();
+			alert('Pokemon Added to your lineup.');
+            getMyPokemon();
+		} catch (err) {
+			console.error('err', err);
+		}
+	}
+
+    const onAddPokemonClick = (event) => {
+        const params = {
+            user_pokemon: {
+                info: {
+                    pokedex_id: pokemons[0].id,
+                    moveset: pokemons[0].moveset,
+                    pokemon_attributes: {
+                        name: pokemons[0].name
+                    }
+                }
+            }
+        }
+        addPokemon(params);
+        
     }
 
     // return !pokemons.length ?
@@ -117,7 +154,7 @@ function App () {
                             <div className="pokemon-data mv4 ml4">
                                 <h1 className='f4 white mb2'>Pokemon Data</h1>
                                 <div className='center ba b--black-10 shadow-5 data'>
-
+                                    <PokemonData getPokemonInfo={mypokemonsInfo}/>
                                 </div>
                             </div>
                     </div>
@@ -128,9 +165,9 @@ function App () {
                             <SearchButton searchClick={onSearchClick} />
                         </div>
                         <ErrorBoundry>
-                            <CardList pokemons={filteredPokemons} />
+                            <CardList pokemons={pokemons} />
                         </ErrorBoundry>
-                        <AddLineupButton />
+                        <AddLineupButton addPokemonClick={onAddPokemonClick}/>
                     </div>
                     </article>
             </div>
