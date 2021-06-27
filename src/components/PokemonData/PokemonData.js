@@ -43,23 +43,19 @@ const PokemonData = ({getPokemonInfo, summonPokemons, updatePokemons}) => {
 
     const onNameChange = (event) => {
         setName(event.target.value)
-        console.log(name);
     }
     const onNicknameChange = (event) => {
         setNickname(event.target.value)
-        console.log(nickname);
+
     }
     const onFavcolorChange = (event) => {
         setFavcolor(event.target.value)
-        console.log(favcolor);
     }
     const onFavfoodChange = (event) => {
         setFavfood(event.target.value)
-        console.log(favfood);
     }
     const onMoveChange = (event) => {
         setMove(event.target.value)
-        console.log(move);
     }
 
     return (
