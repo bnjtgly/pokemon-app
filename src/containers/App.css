@@ -27,6 +27,11 @@ h1 {
 
 .pointer {cursor: pointer;}
 
+.react-confirm-alert-body h1 {
+    font-size: unset;
+    font-family: sans-serif;
+}
+
 .background-color-bug {
     background: -webkit-linear-gradient(
 180deg
