@@ -1,7 +1,13 @@
 # Pokemon App
 
-1. Clone the repo.
-2. Run npm install
-3. Run npm start.
+Note: 
+1. Run in windows
+2. npm should be installed
+3. Please use vscode for smooth install(use command in vscode)
 
-Note: Please run it on any port except 3000.
+1. Clone in any folder
+2. git clone https://github.com/bnjtgly/pokemon-app.git
+3. cd pokemon-app
+4. npm install
+5. npm start (Run in vscode because it will automatically switch ports, so that it will not conflict with running rails API)
+
