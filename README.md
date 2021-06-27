@@ -1,9 +1,9 @@
 # Pokemon App
 
 Note: 
-1. Run in windows
-2. npm should be installed
-3. Please use vscode for smooth install(use command in vscode)
+1. Run on windows.
+2. node.js should be installed.
+3. Please use vscode for smooth installation(use command in vscode)
 
 1. Clone in any folder
 2. git clone https://github.com/bnjtgly/pokemon-app.git
